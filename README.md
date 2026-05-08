@@ -1,4 +1,4 @@
-# Software Cloud Computing Project
+# SWCC-Project — Mini-Jira on AWS
 
 A lightweight team task-management platform built on AWS — supporting role-based access, event-driven notifications, and a Kanban board UI.
 
