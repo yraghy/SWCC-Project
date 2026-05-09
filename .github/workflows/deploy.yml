@@ -1,0 +1,72 @@
+# Deploy on push to main.
+#
+# Requires the following GitHub repo secrets (set after manual AWS provisioning):
+#   AWS_ROLE_TO_ASSUME            — IAM role for OIDC, has rights to refresh ASG instances and update Lambdas
+#   AWS_REGION                    — e.g. eu-central-1
+#   ASG_NAME                      — Auto Scaling Group name for the backend
+#   LAMBDA_IMAGE_RESIZE           — function name
+#   LAMBDA_ASSIGNMENT_WORKER      — function name
+#   LAMBDA_DAILY_DIGEST           — function name
+#
+# Until secrets are populated this workflow runs in a no-op "dry" mode that
+# only verifies the build artifacts compile.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: Package lambdas
+        run: |
+          for fn in image-resize assignment-worker daily-digest; do
+            (cd lambdas/$fn && npm ci --omit=dev || npm install --omit=dev)
+            (cd lambdas/$fn && zip -qr "../$fn.zip" .)
+          done
+
+      - name: Configure AWS credentials
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update Lambda code
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        run: |
+          aws lambda update-function-code --function-name "${{ secrets.LAMBDA_IMAGE_RESIZE }}"      --zip-file fileb://lambdas/image-resize.zip
+          aws lambda update-function-code --function-name "${{ secrets.LAMBDA_ASSIGNMENT_WORKER }}" --zip-file fileb://lambdas/assignment-worker.zip
+          aws lambda update-function-code --function-name "${{ secrets.LAMBDA_DAILY_DIGEST }}"      --zip-file fileb://lambdas/daily-digest.zip
+
+      - name: Roll EC2 instances (pull + restart)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        run: |
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name "${{ secrets.ASG_NAME }}" \
+            --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 60}'
