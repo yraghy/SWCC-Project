@@ -1,0 +1,10 @@
+{
+  "name": "mini-jira-image-resize",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.682.0"
+  },
+  "comment": "sharp comes from a Lambda Layer (lambdas/layers/sharp). Do not bundle locally."
+}
