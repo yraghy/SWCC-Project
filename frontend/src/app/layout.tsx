@@ -4,7 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mini-Jira",
+  title: "SWCC-Project",
   description: "Lightweight team task management",
 };
 

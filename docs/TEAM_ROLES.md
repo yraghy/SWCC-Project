@@ -1,4 +1,4 @@
-# Team Roles — Mini-Jira on AWS
+# Team Roles — SWCC-Project on AWS
 
 A strict serial ordering for a 5-person team working in a single shared AWS account. Each member's **"go" signal** is the previous member finishing their handoff. This is the order to follow if you want zero blocking ambiguity; if you want more parallelism, see [Optional parallel work](#optional-parallel-work) at the bottom.
 
@@ -26,13 +26,13 @@ A strict serial ordering for a 5-person team working in a single shared AWS acco
 
 1. **AWS account & IAM**
    - Enable MFA on root, lock root credentials away.
-   - Create an IAM group `MiniJiraTeam` with `PowerUserAccess`.
+   - Create an IAM group `SWCCProjectTeam` with `PowerUserAccess`.
    - Create 5 IAM users (one per teammate); add them to the group; share the console URL `https://<ACCOUNT_ID>.signin.aws.amazon.com/console` and individual access keys.
    - Set a CloudWatch billing alarm at $5 to catch runaway charges.
 2. **Region lock-in** — pick one (`eu-central-1` is the code default) and post it everywhere.
 3. **Cognito user pool** — see [`CLOUD_SETUP.md` §2](./CLOUD_SETUP.md#2-cognito-user-pool). Required attributes plus custom `custom:role` and `custom:teamId`. Seed Ali / Sara / Omar.
 4. **DynamoDB tables** — [§3](./CLOUD_SETUP.md#3-dynamodb-tables). All six tables + the three GSIs on `tasks`. Create GSIs at table-creation time (in-place GSI add is slow).
-5. **S3 buckets** — [§4](./CLOUD_SETUP.md#4-s3-buckets). Versioning **ON** for `mini-jira-originals`.
+5. **S3 buckets** — [§4](./CLOUD_SETUP.md#4-s3-buckets). Versioning **ON** for `swcc-project-originals`.
 6. **IAM roles** — one each for EC2 (DynamoDB CRUD + S3 + SNS publish + CloudWatch metrics + SSM read), image-resize Lambda (S3 read/write), assignment-worker Lambda (SQS + DDB + CloudWatch), daily-digest Lambda (DDB scan + SNS publish).
 
 ### Handoff (commit-or-paste to team chat)
@@ -42,8 +42,8 @@ A strict serial ordering for a 5-person team working in a single shared AWS acco
 {
   "region": "eu-central-1",
   "cognito": { "userPoolId": "eu-central-1_XXXX", "clientId": "XXXX" },
-  "dynamodb": { "users": "mini-jira-users", "teams": "mini-jira-teams", "...": "..." },
-  "s3": { "originals": "mini-jira-originals", "resized": "mini-jira-resized" }
+  "dynamodb": { "users": "swcc-project-users", "teams": "swcc-project-teams", "...": "..." },
+  "s3": { "originals": "swcc-project-originals", "resized": "swcc-project-resized" }
 }
 ```
 
@@ -64,9 +64,9 @@ Done when: Member 2 can run the backend locally and a `GET /api/teams` against r
    - `POST /api/projects` → creates project.
    - `POST /api/tasks` → creates task, fires SNS publish (may fail loudly here — that's OK, Member 3 hasn't built SNS yet; comment out or note for them).
 3. **Fix bugs** surfaced by real AWS (cold start latency, IAM permission denials, etc.).
-4. **Write SSM parameters** for every key in `backend/.env.example` under `/mini-jira/<KEY>`, so the EC2 user-data script can pull them at boot:
+4. **Write SSM parameters** for every key in `backend/.env.example` under `/swcc-project/<KEY>`, so the EC2 user-data script can pull them at boot:
    ```bash
-   aws ssm put-parameter --name /mini-jira/COGNITO_USER_POOL_ID --type String --value "eu-central-1_XXXX"
+   aws ssm put-parameter --name /swcc-project/COGNITO_USER_POOL_ID --type String --value "eu-central-1_XXXX"
    # ... repeat for every key
    ```
 
@@ -169,4 +169,4 @@ If you want to shave days off the critical path:
 - **All ARNs / IDs / DNS names go in `aws-config.json` AND get pinned in chat.** Don't share over voice/screen-share only — the next member will need to look them up.
 - **Region is fixed.** If you see a resource you didn't create, you're probably in the wrong region.
 - **Nobody runs `Terminate`** on any resource until grades are released. Per the PDF, terminated resources = zero.
-- **Tag every resource** `Project=mini-jira` so you can list and stop them as a group between sessions.
+- **Tag every resource** `Project=swcc-project` so you can list and stop them as a group between sessions.

@@ -1,1 +1,1 @@
-SWCC-Project — Mini-Jira on AWS
+SWCC-Project — SWCC-Project on AWS

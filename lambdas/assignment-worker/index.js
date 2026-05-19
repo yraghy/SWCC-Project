@@ -6,8 +6,8 @@ const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const crypto = require("crypto");
 
 const REGION = process.env.AWS_REGION || "eu-central-1";
-const NAMESPACE = process.env.CW_NAMESPACE || "MiniJira";
-const AUDIT_TABLE = process.env.DDB_AUDIT_TABLE || "mini-jira-audit";
+const NAMESPACE = process.env.CW_NAMESPACE || "SWCCProject";
+const AUDIT_TABLE = process.env.DDB_AUDIT_TABLE || "swcc-project-audit";
 
 const cw = new CloudWatchClient({ region: REGION });
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {

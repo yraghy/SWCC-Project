@@ -5,8 +5,8 @@ const { DynamoDBDocumentClient, ScanCommand, GetCommand } = require("@aws-sdk/li
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 
 const REGION = process.env.AWS_REGION || "eu-central-1";
-const TASKS_TABLE = process.env.DDB_TASKS_TABLE || "mini-jira-tasks";
-const USERS_TABLE = process.env.DDB_USERS_TABLE || "mini-jira-users";
+const TASKS_TABLE = process.env.DDB_TASKS_TABLE || "swcc-project-tasks";
+const USERS_TABLE = process.env.DDB_USERS_TABLE || "swcc-project-users";
 const DIGEST_TOPIC_ARN = process.env.SNS_DIGEST_TOPIC_ARN;
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }));
@@ -57,13 +57,13 @@ exports.handler = async () => {
       ``,
       ...lines,
       ``,
-      `— Mini-Jira Daily Digest`,
+      `— SWCC-Project Daily Digest`,
     ].join("\n");
 
     await sns.send(
       new PublishCommand({
         TopicArn: DIGEST_TOPIC_ARN,
-        Subject: `Mini-Jira: ${assigneeTasks.length} task(s) due today`.slice(0, 100),
+        Subject: `SWCC-Project: ${assigneeTasks.length} task(s) due today`.slice(0, 100),
         Message: message,
         MessageAttributes: {
           assigneeEmail: { DataType: "String", StringValue: user.email },

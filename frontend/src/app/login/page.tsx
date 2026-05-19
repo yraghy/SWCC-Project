@@ -39,7 +39,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-xl border border-border bg-white p-6 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-fg">Mini-Jira</h1>
+        <h1 className="mb-1 text-xl font-semibold text-fg">SWCC-Project</h1>
         <p className="mb-6 text-sm text-slate-500">Sign in to continue</p>
 
         <form onSubmit={handleSubmit} className="space-y-3">

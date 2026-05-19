@@ -26,7 +26,7 @@ const users: User[] = [
 const projects: Project[] = [
   {
     projectId: "proj-1",
-    name: "Mini-Jira MVP",
+    name: "SWCC-Project MVP",
     description: "Demo project for the cloud course.",
     createdBy: "ali",
     createdAt: "2026-05-01T00:00:00Z",

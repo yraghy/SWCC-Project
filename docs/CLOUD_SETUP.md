@@ -2,7 +2,7 @@
 
 Every cloud-touching part of the codebase reads from environment variables — never from
 hardcoded ARNs. Provision the resources below, then either populate `backend/.env` from
-`aws-config.json`, or upload each value to SSM Parameter Store under `/mini-jira/<KEY>`
+`aws-config.json`, or upload each value to SSM Parameter Store under `/swcc-project/<KEY>`
 (the EC2 user-data script reads from SSM).
 
 > **Order matters** — sections are listed in dependency order.
@@ -33,19 +33,19 @@ All tables: on-demand billing.
 
 | Table | PK | SK | GSIs |
 |---|---|---|---|
-| `mini-jira-users` | `userId` (S) | — | — |
-| `mini-jira-teams` | `teamId` (S) | — | — |
-| `mini-jira-projects` | `projectId` (S) | — | — |
-| `mini-jira-tasks` | `taskId` (S) | — | `byTeam` (PK `teamId`), `byAssignee` (PK `assigneeId`), `byDeadline` (PK `teamId`, SK `deadline`) |
-| `mini-jira-comments` | `taskId` (S) | `commentId` (S) | — |
-| `mini-jira-audit` | `taskId` (S) | `auditId` (S) | — |
+| `swcc-project-users` | `userId` (S) | — | — |
+| `swcc-project-teams` | `teamId` (S) | — | — |
+| `swcc-project-projects` | `projectId` (S) | — | — |
+| `swcc-project-tasks` | `taskId` (S) | — | `byTeam` (PK `teamId`), `byAssignee` (PK `assigneeId`), `byDeadline` (PK `teamId`, SK `deadline`) |
+| `swcc-project-comments` | `taskId` (S) | `commentId` (S) | — |
+| `swcc-project-audit` | `taskId` (S) | `auditId` (S) | — |
 
 All GSIs: project ALL attributes.
 
 ## 4. S3 buckets
 
-- `mini-jira-originals` — **versioning enabled** (PDF requires retaining old image versions).
-- `mini-jira-resized` — versioning optional.
+- `swcc-project-originals` — **versioning enabled** (PDF requires retaining old image versions).
+- `swcc-project-resized` — versioning optional.
 - Block public access on both. Backend uses presigned URLs for read/write.
 
 ## 5. Lambda — Image Resize
@@ -53,28 +53,28 @@ All GSIs: project ALL attributes.
 - Runtime: Node.js 20.
 - Code: `lambdas/image-resize/index.js`.
 - Layer: build sharp on Linux x64 (`cd lambdas/layers/sharp/nodejs && npm install --platform=linux --arch=x64 sharp`), zip the parent dir, publish as a layer.
-- Env: `RESIZED_BUCKET=mini-jira-resized`, `MAX_WIDTH=800`.
-- Trigger: S3 PUT events on `mini-jira-originals`.
+- Env: `RESIZED_BUCKET=swcc-project-resized`, `MAX_WIDTH=800`.
+- Trigger: S3 PUT events on `swcc-project-originals`.
 - IAM: read on originals bucket, write on resized bucket.
 
 ## 6. SNS + SQS — Assignment events
 
-- SNS topic: `mini-jira-assignment` → `SNS_ASSIGNMENT_TOPIC_ARN`.
+- SNS topic: `swcc-project-assignment` → `SNS_ASSIGNMENT_TOPIC_ARN`.
 - Subscriptions on the topic:
   1. **Email** (filter policy optional) — confirm address per assignee, or use a static notifications inbox for demo.
-  2. **SQS queue** `mini-jira-assignments` (raw message delivery off so the worker sees the SNS envelope).
+  2. **SQS queue** `swcc-project-assignments` (raw message delivery off so the worker sees the SNS envelope).
 - IAM: backend EC2 role → `sns:Publish` on the topic.
 
 ## 7. Lambda — Assignment Worker
 
 - Code: `lambdas/assignment-worker/index.js`.
-- Trigger: SQS `mini-jira-assignments` (batch size ~10).
-- Env: `CW_NAMESPACE=MiniJira`, `DDB_AUDIT_TABLE=mini-jira-audit`.
+- Trigger: SQS `swcc-project-assignments` (batch size ~10).
+- Env: `CW_NAMESPACE=SWCCProject`, `DDB_AUDIT_TABLE=swcc-project-audit`.
 - IAM: SQS receive/delete, DynamoDB write to audit, `cloudwatch:PutMetricData`.
 
 ## 8. EventBridge — Daily Digest
 
-- SNS topic: `mini-jira-digest` → `SNS_DIGEST_TOPIC_ARN` (with email subscriptions).
+- SNS topic: `swcc-project-digest` → `SNS_DIGEST_TOPIC_ARN` (with email subscriptions).
 - Lambda: `lambdas/daily-digest/index.js`.
   - Env: `DDB_TASKS_TABLE`, `DDB_USERS_TABLE`, `SNS_DIGEST_TOPIC_ARN`.
   - IAM: DynamoDB scan on tasks & get on users, `sns:Publish`.
@@ -82,23 +82,23 @@ All GSIs: project ALL attributes.
 
 ## 9. CloudWatch
 
-Namespace: `MiniJira`. Backend + assignment worker emit:
+Namespace: `SWCCProject`. Backend + assignment worker emit:
 - `TasksCreated` (dim: TeamId)
 - `TasksClosed` (dim: TeamId)
 - `TimeToCloseMs` (dim: TeamId)
 - `TasksAssignedPerTeam` (dim: TeamId)
 
-**Dashboard `MiniJiraOps`** — 4 widgets minimum:
+**Dashboard `SWCCProjectOps`** — 4 widgets minimum:
 1. Tasks created per day (sum of `TasksCreated`).
 2. Tasks closed per day per team (sum of `TasksClosed`, grouped by TeamId).
 3. Average time to close (avg of `TimeToCloseMs`).
 4. EC2 CPU utilization (`AWS/EC2 CPUUtilization`, by AutoScalingGroupName).
 
-**Alarm**: e.g. `OverdueTasks` — composite metric or scheduled check. Action: publish to an SNS topic (`mini-jira-alerts`).
+**Alarm**: e.g. `OverdueTasks` — composite metric or scheduled check. Action: publish to an SNS topic (`swcc-project-alerts`).
 
 ## 10. EC2 + ALB + Auto Scaling
 
-- Launch template: Amazon Linux 2023, t3.micro, IAM instance profile with: DynamoDB CRUD on the 6 tables, S3 read/write on both buckets, `sns:Publish` on assignment topic, `cloudwatch:PutMetricData`, `ssm:GetParameter` on `/mini-jira/*`.
+- Launch template: Amazon Linux 2023, t3.micro, IAM instance profile with: DynamoDB CRUD on the 6 tables, S3 read/write on both buckets, `sns:Publish` on assignment topic, `cloudwatch:PutMetricData`, `ssm:GetParameter` on `/swcc-project/*`.
 - User data: `scripts/ec2-userdata.sh` (replace `REPO_URL`).
 - Auto Scaling Group: 2 instances min/desired across 2 AZs in private subnets.
 - Application Load Balancer: public subnets, listener 80 → target group port 4000, health check `/health`.
@@ -116,7 +116,7 @@ Namespace: `MiniJira`. Backend + assignment worker emit:
 1. Fill the real values into `aws-config.json` (gitignored — do not commit) and share via the team chat.
 2. For each EC2 env var, run:
    ```bash
-   aws ssm put-parameter --name /mini-jira/COGNITO_USER_POOL_ID --type String --value "..."
+   aws ssm put-parameter --name /swcc-project/COGNITO_USER_POOL_ID --type String --value "..."
    ```
    Repeat for every key in `backend/.env.example`.
 3. Push to `main` → ASG instance refresh → new instances run the user-data script and pull the latest code.

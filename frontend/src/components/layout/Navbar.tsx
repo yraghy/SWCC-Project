@@ -9,7 +9,7 @@ export function Navbar() {
     <header className="border-b border-border bg-white">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         <Link href="/dashboard" className="text-base font-semibold text-fg">
-          Mini-Jira
+          SWCC-Project
         </Link>
         <div className="flex items-center gap-3 text-sm">
           {user && (

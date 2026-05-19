@@ -4,7 +4,7 @@
 set -euxo pipefail
 
 REPO_URL="https://github.com/REPLACE_ME/SWCC-Project.git"
-APP_DIR="/opt/mini-jira"
+APP_DIR="/opt/swcc-project"
 NODE_VERSION="20"
 
 # --- system deps ---
@@ -29,7 +29,7 @@ npm ci --omit=dev
 npm run build
 
 # --- env file ---
-# Pulls SSM parameters into /opt/mini-jira/backend/.env. Provision these
+# Pulls SSM parameters into /opt/swcc-project/backend/.env. Provision these
 # with `aws ssm put-parameter` during manual setup. Keys mirror .env.example.
 ENV_PATH="$APP_DIR/backend/.env"
 {
@@ -42,7 +42,7 @@ ENV_PATH="$APP_DIR/backend/.env"
              DDB_TASKS_GSI_TEAM DDB_TASKS_GSI_ASSIGNEE DDB_TASKS_GSI_DEADLINE \
              S3_ORIGINALS_BUCKET S3_RESIZED_BUCKET \
              SNS_ASSIGNMENT_TOPIC_ARN SNS_DIGEST_TOPIC_ARN CW_NAMESPACE; do
-    VAL=$(aws ssm get-parameter --name "/mini-jira/${KEY}" --with-decryption --query Parameter.Value --output text 2>/dev/null || echo "")
+    VAL=$(aws ssm get-parameter --name "/swcc-project/${KEY}" --with-decryption --query Parameter.Value --output text 2>/dev/null || echo "")
     echo "${KEY}=${VAL}"
   done
 } > "$ENV_PATH"

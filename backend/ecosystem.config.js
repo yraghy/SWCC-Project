@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "mini-jira-backend",
+      name: "swcc-project-backend",
       script: "dist/server.js",
       instances: 1,
       exec_mode: "fork",

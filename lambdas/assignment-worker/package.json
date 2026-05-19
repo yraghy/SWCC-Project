@@ -1,5 +1,5 @@
 {
-  "name": "mini-jira-assignment-worker",
+  "name": "swcc-project-assignment-worker",
   "version": "0.1.0",
   "private": true,
   "main": "index.js",
