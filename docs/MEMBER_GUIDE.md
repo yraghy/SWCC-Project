@@ -319,10 +319,43 @@ For each role, I list (a) trusted entity, (b) attached policies. After creating,
 
 ### 1.8 Seed Cognito users (Ali, Sara, Omar)
 
-The PDF demo scenario requires three specific users. First, create the teams in DynamoDB so you can use their IDs:
+The PDF demo scenario requires three specific users. This step has three sub-tasks: **1.8.a** seed teams in DynamoDB, **1.8.b** create the Cognito users, **1.8.c** make their passwords permanent. For each sub-task you can use either the **Console** path or the **CLI** path — **pick one, don't do both**.
+
+> **Use real email addresses** if you want the assignment-notification emails (Member 3) to actually arrive. For demo purposes, route all three to a single inbox like `yraghy+ali@gmail.com` / `yraghy+sara@gmail.com` (Gmail ignores everything after `+`).
+
+#### 1.8.a Seed 3 teams in DynamoDB
+
+You need three teams (`team-fe`, `team-be`, `team-qa`) before creating Cognito users so the users can reference them.
+
+<details open>
+<summary><strong>👉 Console path (recommended for first-timers)</strong></summary>
+
+For each of the three teams below, do this in the DynamoDB console:
+
+1. Console → **DynamoDB** → **Tables** → click `swcc-project-teams`.
+2. Top-right → **Explore table items**.
+3. **Create item** → **JSON view** (toggle in the top-right of the editor).
+4. Paste the JSON for the team, then **Create item**.
+
+Repeat for all three:
+
+```json
+{ "teamId": "team-fe", "name": "Frontend", "createdAt": "2026-05-14T00:00:00Z" }
+```
+
+```json
+{ "teamId": "team-be", "name": "Backend",  "createdAt": "2026-05-14T00:00:00Z" }
+```
+
+```json
+{ "teamId": "team-qa", "name": "QA",       "createdAt": "2026-05-14T00:00:00Z" }
+```
+</details>
+
+<details>
+<summary><strong>⚡ CLI path (faster — 30 seconds)</strong></summary>
 
 ```bash
-# Replace TIMESTAMP if you re-run
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 aws dynamodb put-item --table-name swcc-project-teams --item \
@@ -334,8 +367,40 @@ aws dynamodb put-item --table-name swcc-project-teams --item \
 aws dynamodb put-item --table-name swcc-project-teams --item \
   '{"teamId":{"S":"team-qa"},"name":{"S":"QA"},"createdAt":{"S":"'"$NOW"'"}}'
 ```
+</details>
 
-Now create the three demo users. Replace `eu-central-1_XXX` with your actual user pool ID:
+#### 1.8.b Create the three Cognito demo users
+
+<details open>
+<summary><strong>👉 Console path</strong></summary>
+
+Repeat the steps below **three times**, once for each user, with the per-user values from the table.
+
+1. Console → **Cognito** → **User pools** → click `swcc-project-users`.
+2. **Users** tab → **Create user**.
+3. **Invitation message**: select **Don't send an invitation**.
+4. **Email address**: enter the user's email (from the table).
+5. Tick **Mark email address as verified**.
+6. **Temporary password**: select **Set a password** → type `TempPass123!`.
+7. Scroll down to **Optional attributes** — fill in:
+   - `name` → the value from the table
+   - `custom:role` → the value from the table
+   - `custom:teamId` → the value from the table (leave blank for Ali)
+8. **Create user**.
+
+Per-user values:
+
+| Email | name | custom:role | custom:teamId |
+|---|---|---|---|
+| `ali@example.com` | `Ali (Manager)` | `manager` | *(leave blank)* |
+| `sara@example.com` | `Sara` | `employee` | `team-fe` |
+| `omar@example.com` | `Omar` | `employee` | `team-be` |
+</details>
+
+<details>
+<summary><strong>⚡ CLI path (faster — 10 seconds for all 3)</strong></summary>
+
+Replace `eu-central-1_XXX` with your actual user pool ID:
 
 ```bash
 POOL_ID=eu-central-1_XXX  # ← paste yours
@@ -376,12 +441,17 @@ aws cognito-idp admin-create-user \
       Name=custom:teamId,Value=team-be \
   --temporary-password "TempPass123!"
 ```
+</details>
 
-> **Use real email addresses** if you want the assignment-notification emails (Member 3) to actually arrive. For demo purposes, you can route all three to a single inbox like `yraghy+ali@gmail.com` / `yraghy+sara@gmail.com` (Gmail ignores everything after `+`).
+#### 1.8.c Make the passwords permanent
 
-To get rid of the "force password change on first login" requirement so the demo doesn't ask for a new password mid-flow, set permanent passwords:
+By default Cognito forces each user to change their password on first sign-in, which derails the demo. Override it.
+
+> **Note**: Cognito's console only lets you *reset* a password (which forces another change on next login). To set a **permanent** password without that prompt you have to use the CLI — there is no fully console equivalent. **Run the CLI block below regardless of which path you used above.**
 
 ```bash
+POOL_ID=eu-central-1_XXX  # ← paste yours if not already set
+
 for USER in ali@example.com sara@example.com omar@example.com; do
   aws cognito-idp admin-set-user-password \
     --user-pool-id $POOL_ID \
@@ -574,7 +644,32 @@ curl http://localhost:4000/health
 
 The backend's `assignee` dropdown queries DynamoDB, not Cognito. Until a user signs in once and triggers `/api/users/me`, the table is empty. For the demo to work without anyone signing in twice, pre-seed the three demo users now.
 
-Run from any shell with AWS CLI configured:
+**Pick one path — don't do both.**
+
+<details open>
+<summary><strong>👉 Console path</strong></summary>
+
+Repeat for each of the three users below:
+
+1. Console → **DynamoDB** → **Tables** → click `swcc-project-users`.
+2. **Explore table items** → **Create item** → **JSON view**.
+3. Paste the JSON for that user → **Create item**.
+
+```json
+{ "userId": "ali",  "email": "ali@example.com",  "name": "Ali (Manager)", "role": "manager",  "teamId": null,      "createdAt": "2026-05-14T00:00:00Z" }
+```
+
+```json
+{ "userId": "sara", "email": "sara@example.com", "name": "Sara",          "role": "employee", "teamId": "team-fe", "createdAt": "2026-05-14T00:00:00Z" }
+```
+
+```json
+{ "userId": "omar", "email": "omar@example.com", "name": "Omar",          "role": "employee", "teamId": "team-be", "createdAt": "2026-05-14T00:00:00Z" }
+```
+</details>
+
+<details>
+<summary><strong>⚡ CLI path</strong></summary>
 
 ```bash
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -588,6 +683,7 @@ aws dynamodb put-item --table-name swcc-project-users --item \
 aws dynamodb put-item --table-name swcc-project-users --item \
   '{"userId":{"S":"omar"},"email":{"S":"omar@example.com"},"name":{"S":"Omar"},"role":{"S":"employee"},"teamId":{"S":"team-be"},"createdAt":{"S":"'"$NOW"'"}}'
 ```
+</details>
 
 > The `userId` values above (`ali`, `sara`, `omar`) are the *friendly* IDs the mock layer uses. **In production these need to match Cognito `sub` (UUID-shaped) values.** Member 5 re-runs this step using real Cognito subs as the last step before the demo.
 
@@ -631,7 +727,46 @@ curl -X POST -H "X-Dev-User: $DEV_USER" -H "Content-Type: application/json" \
 
 The EC2 user-data script reads every env var from SSM under `/swcc-project/<KEY>`. Push everything now so Member 4 doesn't have to.
 
-Save the script below as `scripts/seed-ssm.sh` in the repo:
+> **Honest note**: writing 15 parameters one-by-one in the console is genuinely tedious (~15 min of clicking) and easy to mistype. The CLI script does it in 5 seconds. The console path is still listed for completeness, but for this step the CLI is strongly recommended even if you've used the console for everything else.
+
+**Pick one path — don't do both.**
+
+<details>
+<summary><strong>👉 Console path (15 clicks per parameter × 15 parameters)</strong></summary>
+
+Repeat for each of the 13 parameters in the table:
+
+1. Console → **Systems Manager** → **Parameter Store** → **Create parameter**.
+2. **Name**: `/swcc-project/<KEY>` — e.g. `/swcc-project/COGNITO_USER_POOL_ID`.
+3. **Tier**: Standard.
+4. **Type**: String.
+5. **Value**: paste from the table.
+6. **Create parameter**.
+
+Skip the two SNS topic ARNs (Member 3 will create those parameters).
+
+| Name | Value |
+|---|---|
+| `/swcc-project/COGNITO_USER_POOL_ID` | your User Pool ID (e.g. `eu-central-1_XXX`) |
+| `/swcc-project/COGNITO_CLIENT_ID` | your App Client ID |
+| `/swcc-project/DDB_USERS_TABLE` | `swcc-project-users` |
+| `/swcc-project/DDB_TEAMS_TABLE` | `swcc-project-teams` |
+| `/swcc-project/DDB_PROJECTS_TABLE` | `swcc-project-projects` |
+| `/swcc-project/DDB_TASKS_TABLE` | `swcc-project-tasks` |
+| `/swcc-project/DDB_COMMENTS_TABLE` | `swcc-project-comments` |
+| `/swcc-project/DDB_AUDIT_TABLE` | `swcc-project-audit` |
+| `/swcc-project/DDB_TASKS_GSI_TEAM` | `byTeam` |
+| `/swcc-project/DDB_TASKS_GSI_ASSIGNEE` | `byAssignee` |
+| `/swcc-project/DDB_TASKS_GSI_DEADLINE` | `byDeadline` |
+| `/swcc-project/S3_ORIGINALS_BUCKET` | `swcc-project-originals-<suffix>` |
+| `/swcc-project/S3_RESIZED_BUCKET` | `swcc-project-resized-<suffix>` |
+| `/swcc-project/CW_NAMESPACE` | `SWCCProject` |
+</details>
+
+<details open>
+<summary><strong>⚡ CLI path (recommended — 5 seconds)</strong></summary>
+
+Save the script below as `scripts/seed-ssm.sh` in the repo, edit the values, then run it:
 
 ```bash
 #!/usr/bin/env bash
@@ -679,6 +814,7 @@ Then:
 chmod +x scripts/seed-ssm.sh
 bash scripts/seed-ssm.sh
 ```
+</details>
 
 ### 2.9 Optional: open a backend fix PR
 
@@ -1501,11 +1637,35 @@ Open `https://<cloudfront-domain>/` in a real browser. You should land on the da
 
 Cognito assigns each user a UUID `sub` on creation. The pre-seeded DDB users have friendly IDs (`ali`, `sara`, `omar`) — those won't match the JWT `sub` after real sign-in, so the `/api/users/me` upsert creates *new* user records with UUID IDs, leaving the manager's assignee dropdown showing fresh employees without history.
 
-Two fixes — pick one:
+Two fixes — **pick one**:
 
 **Option A (quickest, what I'd do)**: have each user sign in once to populate. Then re-create demo tasks owned by those new user IDs. Lose the pre-seeded data but everything just works.
 
-**Option B (cleaner)**: rewrite the seeded users with the actual Cognito subs. Get each sub:
+**Option B (cleaner)**: rewrite the seeded users with the actual Cognito subs.
+
+First, get each user's `sub` — **pick one path**:
+
+<details open>
+<summary><strong>👉 Console path</strong></summary>
+
+For each user (Ali, Sara, Omar):
+
+1. Console → **Cognito** → **User pools** → click `swcc-project-users`.
+2. **Users** tab → click the user's row.
+3. On the user details page, look for the **`sub`** attribute under "User attributes" — it's a UUID like `e4567f89-1234-5678-9abc-def012345678`.
+4. Copy it.
+
+Record all three subs in a notes file:
+
+```
+ali  → e4567f89-1234-5678-9abc-def012345678
+sara → f1234567-89ab-cdef-0123-456789abcdef
+omar → 12345678-9abc-def0-1234-56789abcdef0
+```
+</details>
+
+<details>
+<summary><strong>⚡ CLI path</strong></summary>
 
 ```bash
 POOL_ID=eu-central-1_XXX
@@ -1515,8 +1675,9 @@ for EMAIL in ali@example.com sara@example.com omar@example.com; do
   echo "$EMAIL → $SUB"
 done
 ```
+</details>
 
-Then re-run the DDB put-item commands from Member 2 step 2.6 with the real subs as `userId`.
+Then re-run the user-seeding step from Member 2 step 2.6 (either console or CLI path) using these UUIDs as the `userId` field instead of the friendly `ali` / `sara` / `omar` strings.
 
 ### 5.8 Update README with the live URL
 
