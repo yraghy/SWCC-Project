@@ -5,5 +5,13 @@
   "description": "Lambda layer providing sharp for the image-resize function. Build with: npm install --platform=linux --arch=x64 sharp",
   "dependencies": {
     "sharp": "^0.33.5"
-  }
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }

@@ -4,7 +4,16 @@
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.682.0"
+    "@aws-sdk/client-s3": "^3.1049.0",
+    "sharp": "^0.34.5"
   },
-  "comment": "sharp comes from a Lambda Layer (lambdas/layers/sharp). Do not bundle locally."
+  "comment": "sharp comes from a Lambda Layer (lambdas/layers/sharp). Do not bundle locally.",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
