@@ -25,12 +25,12 @@ export const env = {
   },
 
   ddb: {
-    users: required("DDB_USERS_TABLE", "mini-jira-users"),
-    teams: required("DDB_TEAMS_TABLE", "mini-jira-teams"),
-    projects: required("DDB_PROJECTS_TABLE", "mini-jira-projects"),
-    tasks: required("DDB_TASKS_TABLE", "mini-jira-tasks"),
-    comments: required("DDB_COMMENTS_TABLE", "mini-jira-comments"),
-    audit: required("DDB_AUDIT_TABLE", "mini-jira-audit"),
+    users: required("DDB_USERS_TABLE", "swcc-project-users"),
+    teams: required("DDB_TEAMS_TABLE", "swcc-project-teams"),
+    projects: required("DDB_PROJECTS_TABLE", "swcc-project-projects"),
+    tasks: required("DDB_TASKS_TABLE", "swcc-project-tasks"),
+    comments: required("DDB_COMMENTS_TABLE", "swcc-project-comments"),
+    audit: required("DDB_AUDIT_TABLE", "swcc-project-audit"),
     gsi: {
       tasksByTeam: required("DDB_TASKS_GSI_TEAM", "byTeam"),
       tasksByAssignee: required("DDB_TASKS_GSI_ASSIGNEE", "byAssignee"),
@@ -39,16 +39,17 @@ export const env = {
   },
 
   s3: {
-    originals: required("S3_ORIGINALS_BUCKET", "mini-jira-originals"),
-    resized: required("S3_RESIZED_BUCKET", "mini-jira-resized"),
+    originals: optional("S3_ORIGINALS_BUCKET"),
+    resized: optional("S3_RESIZED_BUCKET"),
   },
 
   sns: {
     assignmentTopicArn: optional("SNS_ASSIGNMENT_TOPIC_ARN"),
     digestTopicArn: optional("SNS_DIGEST_TOPIC_ARN"),
+    alertsTopicArn: optional("SNS_ALERTS_TOPIC_ARN"),
   },
 
   cloudwatch: {
-    namespace: optional("CW_NAMESPACE", "MiniJira"),
+    namespace: optional("CW_NAMESPACE", "SWCCProject"),
   },
 };
