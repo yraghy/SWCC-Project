@@ -81,13 +81,17 @@ export function TaskForm({ onCreated, onClose }: Props) {
         <Input label="Deadline" type="date" value={deadline} onChange={setDeadline} required />
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onClose} className="rounded-md border border-border px-3 py-1.5 text-sm">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg border border-border px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-muted"
+        >
           Cancel
         </button>
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-brand-gradient px-4 py-1.5 text-sm font-semibold text-white shadow-lift transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
         >
           {submitting ? "Creating…" : "Create task"}
         </button>
@@ -117,7 +121,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full rounded-md border border-border bg-white px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+        className="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft focus:outline-none"
       />
     </label>
   );
@@ -131,7 +135,7 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="w-full rounded-md border border-border bg-white px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+        className="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft focus:outline-none"
       />
     </label>
   );
@@ -157,7 +161,7 @@ function Select({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full rounded-md border border-border bg-white px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+        className="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft focus:outline-none"
       >
         <option value="">— select —</option>
         {options.map((o) => (

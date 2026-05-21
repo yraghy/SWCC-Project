@@ -6,7 +6,39 @@
   color-scheme: light;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
-  background: hsl(210, 40%, 98%);
+  background:
+    radial-gradient(900px circle at 0% 0%, hsla(221, 83%, 53%, 0.06), transparent 45%),
+    radial-gradient(900px circle at 100% 0%, hsla(262, 83%, 58%, 0.06), transparent 45%),
+    hsl(210, 40%, 98%);
+  background-attachment: fixed;
   color: hsl(222, 47%, 11%);
+}
+
+::selection {
+  background: hsla(221, 83%, 53%, 0.18);
+}
+
+/* Sleek, thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(214, 32%, 80%) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: hsl(214, 32%, 82%);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(221, 83%, 70%);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
