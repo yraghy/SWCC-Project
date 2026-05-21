@@ -25,7 +25,7 @@ else
 fi
 
 cd "$APP_DIR/backend"
-npm ci --omit=dev
+npm ci 
 npm run build
 
 # --- env file ---
