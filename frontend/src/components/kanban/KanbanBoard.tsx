@@ -44,13 +44,18 @@ export function KanbanBoard({ teamId }: Props) {
   }
 
   if (loading) {
-    return <div className="p-8 text-sm text-slate-500">Loading tasks…</div>;
+    return (
+      <div className="flex items-center gap-2 p-8 text-sm text-slate-500">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" aria-hidden />
+        Loading tasks…
+      </div>
+    );
   }
 
   return (
     <>
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex animate-fade-in-up gap-4 overflow-x-auto pb-4">
           {TASK_STATUSES.map((status) => (
             <KanbanColumn
               key={status}
