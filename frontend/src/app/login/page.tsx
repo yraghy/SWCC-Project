@@ -38,9 +38,16 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-xl border border-border bg-white p-6 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-fg">Mini-Jira</h1>
-        <p className="mb-6 text-sm text-slate-500">Sign in to continue</p>
+      <div className="w-full max-w-sm animate-fade-in-up rounded-2xl border border-border bg-white/80 p-7 shadow-card backdrop-blur-sm">
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-lg shadow-lift" aria-hidden>
+              🗂️
+            </span>
+            <h1 className="bg-brand-gradient bg-clip-text text-2xl font-bold text-transparent">Mini-Jira</h1>
+          </div>
+          <p className="text-sm text-slate-500">Welcome back — let&apos;s ship something today.</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -49,7 +56,7 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft focus:outline-none"
           />
           <input
             type="password"
@@ -57,26 +64,26 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             required
-            className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft focus:outline-none"
           />
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-md bg-accent py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-gradient py-2 text-sm font-semibold text-white shadow-lift transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
           >
-            {submitting ? "Signing in…" : "Sign in"}
+            {submitting ? "Signing in…" : "Sign in →"}
           </button>
         </form>
 
         {USE_MOCKS && (
-          <div className="mt-6 rounded-md border border-dashed border-border p-3">
+          <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/40 p-3">
             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
               Dev — quick login (mock mode)
             </p>
             <div className="flex flex-wrap gap-2">
-              <DevButton onClick={() => handleDev("ali")}>Ali (Manager)</DevButton>
-              <DevButton onClick={() => handleDev("sara")}>Sara (FE)</DevButton>
-              <DevButton onClick={() => handleDev("omar")}>Omar (BE)</DevButton>
+              <DevButton onClick={() => handleDev("ali")}>👔 Ali (Manager)</DevButton>
+              <DevButton onClick={() => handleDev("sara")}>🎨 Sara (FE)</DevButton>
+              <DevButton onClick={() => handleDev("omar")}>⚙️ Omar (BE)</DevButton>
             </div>
           </div>
         )}
@@ -87,7 +94,10 @@ export default function LoginPage() {
 
 function DevButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="rounded border border-border px-2 py-1 text-xs hover:bg-muted">
+    <button
+      onClick={onClick}
+      className="rounded-lg border border-border bg-white px-2.5 py-1 text-xs transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-accent-soft hover:text-accent"
+    >
       {children}
     </button>
   );

@@ -21,9 +21,9 @@ export function TaskModal({ taskId, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"
+        className="w-full max-w-2xl animate-pop-in rounded-2xl border border-border bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {loading || !task ? (

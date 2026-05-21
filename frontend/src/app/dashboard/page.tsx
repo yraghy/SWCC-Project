@@ -21,7 +21,12 @@ export default function DashboardPage() {
   }, [loading, user, router]);
 
   if (loading || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">Loading…</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center gap-2 text-sm text-slate-500">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" aria-hidden />
+        Loading…
+      </div>
+    );
   }
 
   const isManager = user.role === "manager" || user.role === "admin";
@@ -34,7 +39,9 @@ export default function DashboardPage() {
         <main className="flex-1 p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold text-fg">Board</h1>
+              <h1 className="flex items-center gap-2 text-lg font-semibold text-fg">
+                <span aria-hidden>🗂️</span> Board
+              </h1>
               <p className="text-xs text-slate-500">
                 {isManager ? "Viewing all tasks across the company" : `Viewing tasks for your team (${user.teamId})`}
               </p>
@@ -44,7 +51,7 @@ export default function DashboardPage() {
               {isManager && (
                 <button
                   onClick={() => setCreateOpen(true)}
-                  className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white"
+                  className="rounded-lg bg-brand-gradient px-3.5 py-1.5 text-sm font-semibold text-white shadow-lift transition-all hover:brightness-110 active:scale-95"
                 >
                   + New task
                 </button>
@@ -56,9 +63,11 @@ export default function DashboardPage() {
       </div>
 
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setCreateOpen(false)}>
-          <div className="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-4 text-lg font-semibold text-fg">Create task</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setCreateOpen(false)}>
+          <div className="w-full max-w-xl animate-pop-in rounded-2xl border border-border bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-fg">
+              <span aria-hidden>✨</span> Create task
+            </h2>
             <TaskForm
               onCreated={() => setRefreshKey((k) => k + 1)}
               onClose={() => setCreateOpen(false)}
