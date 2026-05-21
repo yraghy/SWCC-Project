@@ -3,7 +3,7 @@
 # Replace REPO_URL with your fork before launching the ASG.
 set -euxo pipefail
 
-REPO_URL="https://github.com/REPLACE_ME/SWCC-Project.git"
+REPO_URL="https://github.com/yraghy/SWCC-Project.git"
 APP_DIR="/opt/mini-jira"
 NODE_VERSION="20"
 
