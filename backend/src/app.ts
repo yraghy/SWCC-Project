@@ -26,7 +26,7 @@ export function createApp() {
   app.use("/api/users", usersRouter);
 
   // Serve the statically-exported frontend (Next.js `out/`).
-  const STATIC_DIR = path.join(__dirname, "..", "..", "frontend", "out");
+  const STATIC_DIR = path.join(__dirname, "..", "..", "..", "..", "frontend", "out");
   app.use(express.static(STATIC_DIR));
 
   // SPA fallback — any non-/api GET returns index.html.
