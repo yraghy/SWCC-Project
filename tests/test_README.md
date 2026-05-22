@@ -1,0 +1,1 @@
+- daily-digest-invoke.json: test result for calling daily-digest crontab scheduler
