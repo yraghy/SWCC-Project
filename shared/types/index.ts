@@ -62,6 +62,7 @@ export interface Comment {
   commentId: string;
   taskId: string;
   authorId: string;
+  authorName?: string;
   body: string;
   createdAt: string;
 }

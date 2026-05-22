@@ -10,6 +10,7 @@ export async function createComment(user: AuthClaims, taskId: string, dto: Creat
     commentId: uuid(),
     taskId,
     authorId: user.sub,
+    authorName: user.name,
     body: dto.body,
     createdAt: new Date().toISOString(),
   };

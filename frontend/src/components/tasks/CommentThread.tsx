@@ -36,7 +36,7 @@ export function CommentThread({ taskId }: { taskId: string }) {
           {data.map((c) => (
             <li key={c.commentId} className="rounded-md bg-muted p-2 text-sm">
               <div className="mb-0.5 flex items-center justify-between text-xs text-slate-500">
-                <span className="font-medium">{c.authorId}</span>
+                <span className="font-medium">{c.authorName ?? c.authorId}</span>
                 <span>{new Date(c.createdAt).toLocaleString()}</span>
               </div>
               <p className="text-fg">{c.body}</p>

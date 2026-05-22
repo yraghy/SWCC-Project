@@ -162,6 +162,7 @@ export const mockApi = {
       commentId: `c-${comments.length + 1}`,
       taskId,
       authorId: currentUserId,
+      authorName: users.find((u) => u.userId === currentUserId)?.name ?? currentUserId,
       body: dto.body,
       createdAt: new Date().toISOString(),
     };

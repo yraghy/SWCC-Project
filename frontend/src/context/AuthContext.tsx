@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { configureAuth, api } from "@/lib/api";
 import { setMockUser } from "@/mocks/api.mock";
 import * as cognito from "@/lib/cognito";
@@ -21,15 +21,15 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
+  const tokenRef = useRef<string | null>(null);
   const [devClaims, setDevClaims] = useState<AuthClaims | null>(null);
 
   useEffect(() => {
     configureAuth({
-      token: () => token,
+      token: () => tokenRef.current,
       devUser: () => devClaims,
     });
-  }, [token, devClaims]);
+  }, [devClaims]);
 
   useEffect(() => {
     (async () => {
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           const session = await cognito.getCurrentSession();
           if (session) {
-            setToken(session.idToken);
+            tokenRef.current = session.idToken;
             const me = await api.me();
             setUser(me);
           }
@@ -67,13 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signIn: async (email, password) => {
       const session = await cognito.signIn(email, password);
-      setToken(session.idToken);
+      tokenRef.current = session.idToken;
       const me = await api.me();
       setUser(me);
     },
     signOut: async () => {
       cognito.signOut();
-      setToken(null);
+      tokenRef.current = null;
       setDevClaims(null);
       setUser(null);
       if (typeof window !== "undefined") localStorage.removeItem("mock-user");
