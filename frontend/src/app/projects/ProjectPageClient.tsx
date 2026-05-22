@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -11,9 +11,10 @@ import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import type { Project } from "@shared/types";
 
-export default function ProjectPage() {
+export function ProjectPageClient() {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("id");
   const { user, loading } = useAuth();
   const [teamFilter, setTeamFilter] = useState("");
 
@@ -22,7 +23,7 @@ export default function ProjectPage() {
   }, [loading, user, router]);
 
   const { data: projects } = useSWR<Project[]>(user ? "projects" : null, () => api.listProjects());
-  const project = projects?.find((p) => p.projectId === params.id);
+  const project = projects?.find((p) => p.projectId === projectId);
 
   if (loading || !user) return <div className="p-8 text-sm text-slate-500">Loading…</div>;
 
