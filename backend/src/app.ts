@@ -27,7 +27,7 @@ export function createApp() {
 
   // Serve the statically-exported frontend (Next.js `out/`).
   const STATIC_DIR = path.join(__dirname, "..", "..", "..", "..", "frontend", "out");
-  app.use(express.static(STATIC_DIR));
+  app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
 
   // SPA fallback — any non-/api GET returns index.html.
   app.get(/^(?!\/api).*/, (_req, res) => {
