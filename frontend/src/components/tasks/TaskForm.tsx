@@ -23,6 +23,7 @@ export function TaskForm({ onCreated, onClose }: Props) {
   const [deadline, setDeadline] = useState("");
   const [projectId, setProjectId] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -33,7 +34,16 @@ export function TaskForm({ onCreated, onClose }: Props) {
     }
     setSubmitting(true);
     try {
-      await api.createTask({ title, description, priority, deadline, projectId, teamId, assigneeId });
+      const task = await api.createTask({ title, description, priority, deadline, projectId, teamId, assigneeId });
+      if (imageFile) {
+        const { uploadUrl, key } = await api.presignUpload(task.taskId, imageFile.type);
+        await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": imageFile.type },
+          body: imageFile,
+        });
+        await api.attachImage(task.taskId, key);
+      }
       toast.success("Task created");
       onCreated();
       onClose();
@@ -80,6 +90,17 @@ export function TaskForm({ onCreated, onClose }: Props) {
         />
         <Input label="Deadline" type="date" value={deadline} onChange={setDeadline} required />
       </div>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-600">
+          Image (optional)
+        </span>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          className="w-full text-sm"
+        />
+      </label>
       <div className="flex justify-end gap-2 pt-2">
         <button
           type="button"
