@@ -48,6 +48,17 @@ ENV_PATH="$APP_DIR/backend/.env"
 } > "$ENV_PATH"
 chmod 600 "$ENV_PATH"
 
+# --- build frontend (served statically by the backend) ---
+cd "$APP_DIR/frontend"
+npm ci
+NEXT_PUBLIC_USE_MOCKS=false \
+NEXT_PUBLIC_API_BASE_URL="$(aws ssm get-parameter --name /swcc-project/CLOUDFRONT_URL --query Parameter.Value --output text)" \
+NEXT_PUBLIC_COGNITO_USER_POOL_ID="$(aws ssm get-parameter --name /swcc-project/COGNITO_USER_POOL_ID --query Parameter.Value --output text)" \
+NEXT_PUBLIC_COGNITO_CLIENT_ID="$(aws ssm get-parameter --name /swcc-project/COGNITO_CLIENT_ID --query Parameter.Value --output text)" \
+npm run build
+
+cd "$APP_DIR/backend"
+
 # --- run with pm2 ---
 pm2 start ecosystem.config.js
 pm2 save
