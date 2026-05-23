@@ -1,10 +1,5 @@
 # Team Roles — Mini-Jira on AWS
 
-A strict serial ordering for a 5-person team working in a single shared AWS account. Each member's **"go" signal** is the previous member finishing their handoff. This is the order to follow if you want zero blocking ambiguity; if you want more parallelism, see [Optional parallel work](#optional-parallel-work) at the bottom.
-
-> **Deadline:** 22 May 2026 · ~12 days from kickoff.
-
----
 
 ## Sequence at a glance
 
@@ -151,22 +146,3 @@ Done when: `curl https://<cloudfront>/api/health` returns `{ ok: true }` end-to-
 7. **Record the demo video** — screen record the dry-run with narration covering each AWS service in the architecture.
 
 Done when: a fresh browser at the CloudFront URL passes the PDF demo scenario, and the video is uploaded.
-
----
-
-## Optional parallel work
-
-If you want to shave days off the critical path:
-
-- **M3 can scaffold Lambdas locally** during M2's window. They can write handler code, build the sharp layer, and unit-test handlers with the AWS SDK pointed at LocalStack or with mocked events. End-to-end verification still has to wait for M2.
-- **M5 can polish the frontend and build the image-upload UI** against mocks during any earlier window. The only thing that has to wait for M4 is the production wiring.
-- **M4 can pre-build the VPC, ALB, and ASG with a placeholder backend image** during M3's window. Swap the user-data once M2/M3 finish.
-
----
-
-## Communication rules
-
-- **All ARNs / IDs / DNS names go in `aws-config.json` AND get pinned in chat.** Don't share over voice/screen-share only — the next member will need to look them up.
-- **Region is fixed.** If you see a resource you didn't create, you're probably in the wrong region.
-- **Nobody runs `Terminate`** on any resource until grades are released. Per the PDF, terminated resources = zero.
-- **Tag every resource** `Project=mini-jira` so you can list and stop them as a group between sessions.

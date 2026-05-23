@@ -18,4 +18,4 @@ The diagram below illustrates the high-availability setup: Amazon CloudFront in 
 
 ## 🎬 Demo Video
 
-▶️ **[Project Demo Video](https://example.com/swcc-project-demo-placeholder)** — _placeholder link; the actual demo video URL will be added here._
+▶️ **[Project Demo Video](https://youtu.be/ScqqxreiX1M)** 
